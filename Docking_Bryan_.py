@@ -97,18 +97,18 @@ while True:
             set_rc_channel_pwm(3, 1500)
             print("Stop checking for py now")
 
-    if not (630 <= px <= 1040):
+    if not (880 <= px <= 1040):
         set_rc_channel_pwm(6, 1500 + int(lat))
         print("Rechecking for py")
         if (630 <= px <= 1040):
             set_rc_channel_pwm(6, 1500)
 
-    if (495 <= py <= 595) and (630 <= px <= 1040):
+    if (495 <= py <= 595) and (880 <= px <= 1040):
         # while (495 <= py <= 595) and (630 <= px <= 1040):
         #     set_rc_channel_pwm(5, 1900)
         set_rc_channel_pwm(5, 1900)
 
-    if not (495 <= py <= 595) and (630 <= px <= 1040):
+    if not (495 <= py <= 595) and (880 <= px <= 1040):
         set_rc_channel_pwm(5, 1500)
 
     cv2.imshow("vid", vid)
