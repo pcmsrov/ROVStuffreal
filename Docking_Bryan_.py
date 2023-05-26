@@ -92,7 +92,6 @@ while True:
     if not (495 <= py <= 595):
         set_rc_channel_pwm(3, 1500 + int(depth))
         print("Rechecking for py")
-        M = cv2.moments(i)
 
         if (495 <= py <= 595):
             set_rc_channel_pwm(3, 1500)
@@ -101,7 +100,6 @@ while True:
     if not (630 <= px <= 1040):
         set_rc_channel_pwm(6, 1500 + int(lat))
         print("Rechecking for py")
-        M = cv2.moments(i)
         if (630 <= px <= 1040):
             set_rc_channel_pwm(6, 1500)
 
