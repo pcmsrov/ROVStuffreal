@@ -91,7 +91,7 @@ while True:
 
         noiseless_image_bw = cv2.fastNlMeansDenoising(captured_frame_lab_red, None, 20, 7, 21)
 
-        circles = cv2.HoughCircles(captured_frame_lab_red, cv2.HOUGH_GRADIENT, 1, captured_frame_lab_red.shape[0] / 8,
+        circles = cv2.HoughCircles(noiseless_image_bw, cv2.HOUGH_GRADIENT, 1, captured_frame_lab_red.shape[0] / 8,
                                    param1=100, param2=18, minRadius=5, maxRadius=60)
 
         # If we have extracted a circle, draw an outline
