@@ -1,13 +1,15 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+from oepnc import Video
 
-cap = cv2.VideoCapture(0)
+
+cap = Video(port=4777)
 
 while (1):
 
     # Take each frame
-    _, frame = cap.read()
+    frame = cap.frame()
 
     # Convert BGR to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
