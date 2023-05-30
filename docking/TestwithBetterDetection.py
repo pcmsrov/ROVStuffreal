@@ -98,11 +98,15 @@ while True:
                      thickness=2)
           
           px, py = circles[0,0], circles[0, 1]
-          depth = 1500 + ((-20/27) * np.power(py, 1) + 400)
-          lat = 1500 + ((5/12) * np.power(px, 1) - 400)
-          set_rc_channel_pwm(3, int(depth))
-          set_rc_channel_pwm(6, int(lat))
-          set_rc_channel_pwm(5, 1550)
+          if (px >= 800 and px <= 1040) and (py >= 495 and py <= 595):
+              set_rc_channel_pwm(5, 1500)
+              depth = 1500 + ((-20/27) * np.power(py, 1) + 400)
+              lat = 1500 + ((5/12) * np.power(px, 1) - 400)
+              set_rc_channel_pwm(3, int(depth))
+              set_rc_channel_pwm(6, int(lat))
+          else:
+              set_rc_channel_pwm(5, 1600)
+
    
    
           print("frame")
