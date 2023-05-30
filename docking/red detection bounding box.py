@@ -17,7 +17,7 @@ while cap.isOpened():
     result = cv2.bitwise_and(frame, frame, mask = Red_mask)
 
     # Draw rectangular bounded line on the detected red area
-    (ret, contours, hierarchy) = cv2.findContours(Red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    (ret, contours) = cv2.findContours(Red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     for pic,contour in enumerate(contours):
         area = cv2.contourArea(contour)
         if(area > 300): #to remove the noise
