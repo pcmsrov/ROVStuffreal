@@ -46,7 +46,7 @@ while not cap.frame_available():
     print("not available")
 
 print("starting stream")
-current = time.time()
+timer = time.time()
 
 test = cap.frame()
 # grab the width, height, and fps of the frames in the video stream.
@@ -107,8 +107,8 @@ while True:
           else:
               set_rc_channel_pwm(5, 1600)
 
-   
-   
+
+
           print("frame")
           cv2.line(frame, (880, 495), (880, 595), (255, 0, 0), 1)
           cv2.line(frame, (1040, 495), (1040, 595), (255, 0, 0), 1)
