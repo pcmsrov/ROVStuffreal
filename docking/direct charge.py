@@ -19,7 +19,6 @@ def set_rc_channel_pwm(channel_id, pwm=1500):
     if channel_id < 1 or channel_id > 18:
         print("mylls")
         return
-edc
     rc_channel_values = [65535 for _ in range(18)]
     rc_channel_values[channel_id - 1] = pwm
     master.mav.rc_channels_override_send(
