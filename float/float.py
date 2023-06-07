@@ -180,7 +180,7 @@ class FloatControlUI(QtWidgets.QMainWindow):
 
 if __name__ == '__main__':
     # 藍牙裝置設定
-    BT_addr = "9C:9C:1F:EA:FE:5E"
+    BT_addr = "9C:9C:1F:EB:00:82"
     BT_port = 1     # 預設為1，不用改
     
     # UI設定

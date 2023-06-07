@@ -27,7 +27,7 @@ class FloatControlUI(QtWidgets.QMainWindow):
         self.timer.timeout.connect(self.update)
         
         # 藍牙初始化
-        self.is_resetting = True
+        self.is_resetting = True     
         self.BT_addr = BT_addr
         self.BT_port = BT_port
         self.x = threading.Thread(target=self.bluetooth_init)
