@@ -1,5 +1,4 @@
 import time
-from simple_pid import pid
 import cv2
 import numpy as np
 from oepnc import Video
@@ -73,7 +72,7 @@ while True:
                 set_rc_channel_pwm(6, 1500)
                 set_rc_channel_pwm(5, 1900)
             
-=======
+
         print(circles is not None)
 
         if circles is not None and current <= timer + 10:
@@ -93,7 +92,6 @@ while True:
             set_rc_channel_pwm(6, 1500)
             set_rc_channel_pwm(5, 1900)
 
->>>>>>> 9cfe6106b29dcdf6939a5e04a9cd85e69862dfd4
 
         print("frame")
         cv2.line(frame, (880, 495), (880, 595), (255, 0, 0), 1)
