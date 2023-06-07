@@ -71,26 +71,6 @@ while True:
                 set_rc_channel_pwm(3, 1500)
                 set_rc_channel_pwm(6, 1500)
                 set_rc_channel_pwm(5, 1900)
-            
-
-        print(circles is not None)
-
-        if circles is not None and current <= timer + 10:
-            circles = np.round(circles[0, :]).astype("int")
-            cv2.circle(output_frame, center=(circles[0, 0], circles[0, 1]), radius=circles[0, 2], color=(0, 255, 0),
-                       thickness=2)
-
-            px, py = circles[0, 0], circles[0, 1]
-            set_rc_channel_pwm(5, 1500)
-            depth = 1500 + ((-20 / 27) * np.power(py, 1) + 400)
-            lat = 1500 + ((5 / 12) * np.power(px, 1) - 400)
-            set_rc_channel_pwm(3, int(depth))
-            set_rc_channel_pwm(6, int(lat))
-
-        if current >= timer + 10:
-            set_rc_channel_pwm(3, 1500)
-            set_rc_channel_pwm(6, 1500)
-            set_rc_channel_pwm(5, 1900)
 
 
         print("frame")
