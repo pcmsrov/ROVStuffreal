@@ -19,7 +19,6 @@ def set_rc_channel_pwm(channel_id, pwm=1500):
     if channel_id < 1 or channel_id > 18:
         print("mylls")
         return
-
     rc_channel_values = [65535 for _ in range(18)]
     rc_channel_values[channel_id - 1] = pwm
     master.mav.rc_channels_override_send(
@@ -46,12 +45,12 @@ timer = time.time()
 while True:
     current = time.time()
     if cap.frame_available():
-        ret, captured_frame = cap.read()
-        output_frame = captured_frame.copy()
+        frame = cap.frame()
+        output_frame = frame.copy()
 
-        captured_frame_bgr = cv2.cvtColor(captured_frame, cv2.COLOR_BGRA2BGR)
+        captured_frame_bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
         captured_frame_bgr = cv2.medianBlur(captured_frame_bgr, 3)
-        captured_frame_lab = cv2.cvtColor(captured_frame_bgr, cv2.COLOR_BGR2Lab)
+        captured_frame_lab = cv2.cvtColor(captured_frame_bgr, cv2.COLOR_BGR2Lab)    
         captured_frame_lab_red = cv2.inRange(captured_frame_lab, np.array([20, 150, 150]), np.array([190, 255, 255]))
         captured_frame_lab_red = cv2.GaussianBlur(captured_frame_lab_red, (5, 5), 2, 2)
         circles = cv2.HoughCircles(captured_frame_lab_red, cv2.HOUGH_GRADIENT, 1, captured_frame_lab_red.shape[0] / 8,
@@ -74,6 +73,27 @@ while True:
                 set_rc_channel_pwm(6, 1500)
                 set_rc_channel_pwm(5, 1900)
             
+=======
+        print(circles is not None)
+
+        if circles is not None and current <= timer + 10:
+            circles = np.round(circles[0, :]).astype("int")
+            cv2.circle(output_frame, center=(circles[0, 0], circles[0, 1]), radius=circles[0, 2], color=(0, 255, 0),
+                       thickness=2)
+
+            px, py = circles[0, 0], circles[0, 1]
+            set_rc_channel_pwm(5, 1500)
+            depth = 1500 + ((-20 / 27) * np.power(py, 1) + 400)
+            lat = 1500 + ((5 / 12) * np.power(px, 1) - 400)
+            set_rc_channel_pwm(3, int(depth))
+            set_rc_channel_pwm(6, int(lat))
+
+        if current >= timer + 10:
+            set_rc_channel_pwm(3, 1500)
+            set_rc_channel_pwm(6, 1500)
+            set_rc_channel_pwm(5, 1900)
+
+>>>>>>> 9cfe6106b29dcdf6939a5e04a9cd85e69862dfd4
 
         print("frame")
         cv2.line(frame, (880, 495), (880, 595), (255, 0, 0), 1)
