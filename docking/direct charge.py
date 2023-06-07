@@ -55,9 +55,9 @@ while True:
         circles = cv2.HoughCircles(captured_frame_lab_red, cv2.HOUGH_GRADIENT, 1, captured_frame_lab_red.shape[0] / 8,
                                    param1=100, param2=18, minRadius=5, maxRadius=60)
 
-        if circles is not None :
+        if circles is not None:
             circles = np.round(circles[0, :]).astype("int")
-            cv2.circle(output_frame, center=(circles[0, 0], circles[0, 1]), radius=circles[0, 2], color=(0, 255, 0),
+            cv2.circle(frame, center=(circles[0, 0], circles[0, 1]), radius=circles[0, 2], color=(0, 255, 0),
                        thickness=2)
             if current <= timer + 10:
                 px, py = circles[0, 0], circles[0, 1]
