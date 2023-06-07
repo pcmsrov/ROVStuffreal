@@ -45,16 +45,18 @@ timer = time.time()
 while True:
     current = time.time()
     if cap.frame_available():
-        ret, captured_frame = cap.read()
-        output_frame = captured_frame.copy()
+        frame = cap.frame()
+        output_frame = frame.copy()
 
-        captured_frame_bgr = cv2.cvtColor(captured_frame, cv2.COLOR_BGRA2BGR)
+        captured_frame_bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
         captured_frame_bgr = cv2.medianBlur(captured_frame_bgr, 3)
-        captured_frame_lab = cv2.cvtColor(captured_frame_bgr, cv2.COLOR_BGR2Lab)
+        captured_frame_lab = cv2.cvtColor(captured_frame_bgr, cv2.COLOR_BGR2Lab)    
         captured_frame_lab_red = cv2.inRange(captured_frame_lab, np.array([20, 150, 150]), np.array([190, 255, 255]))
         captured_frame_lab_red = cv2.GaussianBlur(captured_frame_lab_red, (5, 5), 2, 2)
         circles = cv2.HoughCircles(captured_frame_lab_red, cv2.HOUGH_GRADIENT, 1, captured_frame_lab_red.shape[0] / 8,
                                    param1=100, param2=18, minRadius=5, maxRadius=60)
+
+        print(circles is not None)
 
         if circles is not None and current <= timer + 10:
             circles = np.round(circles[0, :]).astype("int")
@@ -72,7 +74,7 @@ while True:
             set_rc_channel_pwm(3, 1500)
             set_rc_channel_pwm(6, 1500)
             set_rc_channel_pwm(5, 1900)
-            
+
 
         print("frame")
         cv2.line(frame, (880, 495), (880, 595), (255, 0, 0), 1)
