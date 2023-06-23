@@ -46,7 +46,7 @@ void getTime() {
     struct tm timeinfo;
     getLocalTime(&timeinfo);
 		// 將結果通過藍牙串口傳送到電腦(記得加返team number)
-    BT.println(&timeinfo, "%H:%M:%S UTC TEAM-NUMBER-HERE");
+    BT.println(&timeinfo, "%H:%M:%S UTC RN14 Team Achelous");
   } else { 
 		// 否則傳送空字串表示無改變
     BT.println("");
@@ -84,6 +84,7 @@ void loop() {
       delay(1000*10.5);
       digitalWrite(pin1, LOW);
       for (int i = 0; i < 20; i++) {
+        WiFi.begin(ssid, password);
         if (WiFi.status() == WL_CONNECTED && BT.available()) { 
           configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
           struct tm timeinfo;
@@ -104,6 +105,7 @@ void loop() {
       delay(1000*10.5);
       digitalWrite(pin1, LOW);
       for (int i = 0; i < 20; i++) {
+        WiFi.begin(ssid, password);
         if (WiFi.status() == WL_CONNECTED && BT.available()) { 
           configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
           struct tm timeinfo;
