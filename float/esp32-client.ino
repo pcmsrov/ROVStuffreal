@@ -46,7 +46,7 @@ void getTime() {
     struct tm timeinfo;
     getLocalTime(&timeinfo);
 		// 將結果通過藍牙串口傳送到電腦(記得加返team number)
-    BT.println(&timeinfo, "%H:%M:%S UTC TEAM-R9-HERE");
+    BT.println(&timeinfo, "%H:%M:%S UTC RN14 Team Achelous");
   } else { 
 		// 否則傳送空字串表示無改變
     BT.println("");

@@ -3,7 +3,7 @@
 #include "time.h"
 #include "Timer.h"
 
-const char* ssid     = "HUAWEI P40 Pro"; // WiFi名稱
+const char* ssid     = "pcmsrov"; // WiFi名稱
 const char* password = "12345678";       // WiFi密碼
 const int pin1 = 16; // 紅色板IN1 pin所接的ESP32 pin
 const int pin2 = 17; // 紅色板IN2 pin所接的ESP32 pin
@@ -11,7 +11,7 @@ const int pin2 = 17; // 紅色板IN2 pin所接的ESP32 pin
 // 獲取時間設定(不用改)
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 0;
-const int   daylightOffset_sec = 3600;
+const int   daylightOffset_sec = 0;
 
 BluetoothSerial BT;    // 建立藍牙串口物件
 struct tm timeinfoTmp; // 建立時間結構
@@ -75,6 +75,7 @@ void loop() {
       digitalWrite(pin1, LOW);
     } else if (inputFromPC == "dive") {
       BT.println("Float is diving!");
+      //first dive
       digitalWrite(pin1, LOW);
       digitalWrite(pin2, HIGH);
       delay(1000*20);
@@ -82,6 +83,30 @@ void loop() {
       digitalWrite(pin2, LOW);
       delay(1000*10.5);
       digitalWrite(pin1, LOW);
+      delay(1000*60);
+      if (WiFi.status() == WL_CONNECTED) { 
+        configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+        struct tm timeinfo;
+        getLocalTime(&timeinfo);
+
+        BT.println(&timeinfo, "%H:%M:%S UTC RN14 Team Achelous");
+      }
+      //second dive
+      digitalWrite(pin1, LOW);
+      digitalWrite(pin2, HIGH);
+      delay(1000*20);
+      digitalWrite(pin1, HIGH);
+      digitalWrite(pin2, LOW);
+      delay(1000*10.5);
+      digitalWrite(pin1, LOW);
+      if (WiFi.status() == WL_CONNECTED) { 
+        configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+        struct tm timeinfo;
+        getLocalTime(&timeinfo);
+
+        BT.println(&timeinfo, "%H:%M:%S UTC RN14 Team Achelous");
+      }
+
     } else if (inputFromPC.indexOf("wifi") > -1) {
 			// 以下為遠程控制連接WiFi的程式
       String tmp[3];
