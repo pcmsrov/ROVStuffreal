@@ -83,16 +83,18 @@ void loop() {
       digitalWrite(pin2, LOW);
       delay(1000*10.5);
       digitalWrite(pin1, LOW);
-      delay(1000*120);
-      if (WiFi.status() == WL_CONNECTED) { 
-        configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-        struct tm timeinfo;
-        getLocalTime(&timeinfo);
-
-        BT.println(&timeinfo, "%H:%M:%S UTC RN14 Team Achelous");
-      } else {
-        
+      for (int i = 0; i < 20; i++) {
+        if (WiFi.status() == WL_CONNECTED && BT.available()) { 
+          configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+          struct tm timeinfo;
+          getLocalTime(&timeinfo);
+  
+          BT.println(&timeinfo, "%H:%M:%S UTC RN14 Team Achelous");
+          break;
+        }
+        delay(1000*6); 
       }
+      delay(1000*30);
       //second dive
       digitalWrite(pin1, LOW);
       digitalWrite(pin2, HIGH);
@@ -101,13 +103,16 @@ void loop() {
       digitalWrite(pin2, LOW);
       delay(1000*10.5);
       digitalWrite(pin1, LOW);
-      delay(1000*120)
-      if (WiFi.status() == WL_CONNECTED) { 
-        configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-        struct tm timeinfo;
-        getLocalTime(&timeinfo);
-
-        BT.println(&timeinfo, "%H:%M:%S UTC RN14 Team Achelous");
+      for (int i = 0; i < 20; i++) {
+        if (WiFi.status() == WL_CONNECTED && BT.available()) { 
+          configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+          struct tm timeinfo;
+          getLocalTime(&timeinfo);
+  
+          BT.println(&timeinfo, "%H:%M:%S UTC RN14 Team Achelous");
+          break;
+        }
+        delay(1000*6);
       }
 
     } else if (inputFromPC.indexOf("wifi") > -1) {
