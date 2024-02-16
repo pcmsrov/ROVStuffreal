@@ -2,6 +2,7 @@
 import os
 import glob
 import time
+from tabulate import tabulate
 
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
@@ -27,9 +28,10 @@ def read_temp():
         if equals_pos != -1:
                 temp_string = lines[1][equals_pos+2:]
                 temp_c = (float(temp_string) / 1000.0) + offset
-                temp_f = temp_c * 9.0 / 5.0 + 32.0
-                return temp_c, temp_f
+                temp_n = (float(temp_string) / 1000.0)
+                return temp_c, temp_n
 
 while True:
-        print(read_temp())
+        joe = list(read_temp())
+        print(tabulate([joe[1], joe[0], offset], headers=['Temp', 'Temp w/ Offset', 'Offset'], tablefmt='orgtbl'))
         time.sleep(1)
