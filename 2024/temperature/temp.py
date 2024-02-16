@@ -2,7 +2,6 @@
 import os
 import glob
 import time
-from tabulate import tabulate
 
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
@@ -33,5 +32,7 @@ def read_temp():
 
 while True:
         joe = list(read_temp())
-        print(tabulate([joe[1], joe[0], offset], headers=['Temp', 'Temp w/ Offset', 'Offset'], tablefmt='orgtbl'))
+        table = [['Temp', 'Temp w/ Offset', 'Offset'], [joe[1], joe[0], offset]]
+        for row in table:
+                print('| {:1} | {:^4} | {:>4} |'.format(*row))
         time.sleep(1)
