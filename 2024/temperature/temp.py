@@ -1,4 +1,4 @@
-
+import keyboard
 import os
 import glob
 import time
@@ -33,6 +33,10 @@ def read_temp():
 while True:
         joe = list(read_temp())
         table = [['Temp', 'Temp w/ Offset', 'Offset'], [joe[1], joe[0], offset]]
-        for row in table:
-                print('| {:1} | {:^4} | {:>4} |'.format(*row))
+        try:
+            if keyboard.is_pressed('o')    
+                for row in table:
+                        print('| {:1} | {:^4} | {:>4} |'.format(*row))
+        except:
+                pass
         time.sleep(1)
