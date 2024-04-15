@@ -62,10 +62,8 @@ while True:
         frame = cap.frame()
         
         capframe = color(frame, [0, 0, 0], [0, 0, 29])
-        circles = cv2.HoughCircles(capframe, cv2.HOUGH_GRADIENT, 1, capframe.shape[0] / 8,
-                                   param1=100, param2=18, minRadius=5, maxRadius=60)
         
-        greyscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        greyscale = cv2.cvtColor(capframe, cv2.COLOR_BGR2GRAY)
 
         _, binary_image =  cv2.threshold(greyscale, 150, 255, cv2.THRESH_BINARY)
 
