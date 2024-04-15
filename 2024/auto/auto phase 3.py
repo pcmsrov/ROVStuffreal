@@ -85,7 +85,7 @@ while True:
                 aspect_ratio = float(w) / h
 
                 cv2.drawContours(frame, [approx], -1, (0, 255, 0), 3)
-                centx = x + w/2
+                centx = x + w/2 
                 centy = y + h/2
 
         frame = cv2.circle(frame, (centx, centy), 3, (0, 255, 0), 3)
