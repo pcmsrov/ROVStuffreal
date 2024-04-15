@@ -1,59 +1,18 @@
 import time
 import cv2
 import numpy as np
+import autodefs as auto
+from autodefs import set_rc_channel_pwm
 from oepnc import Video
 from pymavlink import mavutil
 
-master = mavutil.mavlink_connection('udpin:localhost:14445')
-print("waiting heartbeat")
-master.wait_heartbeat()
-print("confirmed")
-master.mav.command_long_send(master.target_system, master.target_component,
-                             mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM, 0, 1, 0, 0, 0, 0, 0, 0)
-
-master.motors_armed_wait()
-
-#initial thing 
-
-def look_at(tilt, roll=0, pan=0):
-    master.mav.command_long_send(
-        master.target_system,
-        master.target_component,
-        mavutil.mavlink.MAV_CMD_DO_MOUNT_CONTROL,
-        1,
-        tilt,
-        roll,
-        pan,
-        0, 0, 0,
-        mavutil.mavlink.MAV_MOUNT_MODE_MAVLINK_TARGETING)
-        
-def set_rc_channel_pwm(channel_id, pwm=1500):
-    if channel_id < 1 or channel_id > 18:
-        print("mylls")
-        return
-    rc_channel_values = [65535 for _ in range(18)]
-    rc_channel_values[channel_id - 1] = pwm
-    master.mav.rc_channels_override_send(
-        master.target_system,  # target_system
-        master.target_component,  # target_component
-        *rc_channel_values)
-
-cap = Video(port=4777)
-print("initalizing ")
-waited = 0
-while not cap.frame_available():
-    waited += 1
-    print("not available")
-
-print("starting stream")
-
-test = cap.frame()
+auto.init()
 
 height, width = 0, 0
 
 timer = time.time()
 
-look_at(0)
+auto.look_at(0)
 time.sleep(0.1)
 
 while True:
@@ -82,7 +41,7 @@ while True:
                 centx = x + w/2
                 centy = y + h/2
 
-        image = cv2.circle(image, (centx, centy), 3, (0, 255, 0), 3)
+        frame = cv2.circle(frame, (centx, centy), 3, (0, 255, 0), 3)
 
         depth = 1500 + ((-20/27) * np.power(centy, 1) + 400)
         lat = 1500 + ((5/12) * np.power(centx, 1) - 400)

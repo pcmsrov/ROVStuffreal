@@ -4,14 +4,27 @@ import numpy as np
 from oepnc import Video
 from pymavlink import mavutil
 
-master = mavutil.mavlink_connection('udpin:localhost:14445')
-print("waiting heartbeat")
-master.wait_heartbeat()
-print("confirmed")
-master.mav.command_long_send(master.target_system, master.target_component,
-                             mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM, 0, 1, 0, 0, 0, 0, 0, 0)
+def init():
+    master = mavutil.mavlink_connection('udpin:localhost:14445')
+    print("waiting heartbeat")
+    master.wait_heartbeat()
+    print("confirmed")
+    master.mav.command_long_send(master.target_system, master.target_component,
+                                mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM, 0, 1, 0, 0, 0, 0, 0, 0)
 
-master.motors_armed_wait()
+    master.motors_armed_wait()
+
+    cap = Video(port=4777)
+    print("initalizing ")
+    waited = 0
+    while not cap.frame_available():
+        waited += 1
+        print("not available")
+
+    print("starting stream")
+
+    test = cap.frame()
+
 
 def color(frame, start, end):
     captured_frame_bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
@@ -44,17 +57,3 @@ def set_rc_channel_pwm(channel_id, pwm=1500):
         master.target_component,  # target_component
         *rc_channel_values)
 
-cap = Video(port=4777)
-print("initalizing ")
-waited = 0
-while not cap.frame_available():
-    waited += 1
-    print("not available")
-
-print("starting stream")
-
-test = cap.frame()
-
-height, width = 0, 0
-
-timer = time.time()

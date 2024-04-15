@@ -68,12 +68,39 @@ while True:
         captured_frame_lab = cv2.cvtColor(captured_frame_bgr, cv2.COLOR_BGR2Lab)    
         captured_frame_lab_red = cv2.inRange(captured_frame_lab, np.array([20, 150, 150]), np.array([190, 255, 255]))
         captured_frame_lab_red = cv2.GaussianBlur(captured_frame_lab_red, (5, 5), 2, 2)
-        circles = cv2.HoughCircles(captured_frame_lab_red, cv2.HOUGH_GRADIENT, 1, captured_frame_lab_red.shape[0] / 8,
-                                   param1=100, param2=18, minRadius=5, maxRadius=60)
 
-        area = cv2.contourArea(cnt)
+        greyscale = cv2.cvtColor(capframe, cv2.COLOR_BGR2GRAY)
+
+        _, binary_image =  cv2.threshold(greyscale, 150, 255, cv2.THRESH_BINARY)
+
+        all_contours, hierachy = cv2.findCounters(binary_image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+        centx, centy = 0, 0
+        for contour in all_contours: 
+            perimeter = cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
+
+            if len(approx) == 4:
+                x, y, w, h == cv2.boundingRect(approx)
+                aspect_ratio = float(w) / h
+
+                cv2.drawContours(frame, [approx], -1, (0, 255, 0), 3)
+                centx = x + w/2
+                centy = y + h/2
+
+        frame = cv2.circle(frame, (centx, centy), 3, (0, 255, 0), 3)
+             
+        if current <= timer + 10:
+            set_rc_channel_pwm(5, 1500)
+            depth = 1500 + ((-20 / 27) * np.power(centy, 1) + 400)
+            lat = 1500 + ((5 / 12) * np.power(centx, 1) - 400)
+            set_rc_channel_pwm(3, int(depth))
+            set_rc_channel_pwm(6, int(lat))
             
-        
+        if current >= timer + 10:
+            set_rc_channel_pwm(3, 1500)
+            set_rc_channel_pwm(6, 1500)
+            set_rc_channel_pwm(5, 1100)
         cv2.imshow('frame', frame)
         if not cap.frame_available():
             print("tears")
