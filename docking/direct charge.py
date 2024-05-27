@@ -56,6 +56,7 @@ while True:
                                    param1=100, param2=18, minRadius=5, maxRadius=60)
 
         if circles is not None:
+            print("found circles")
             circles = np.round(circles[0, :]).astype("int")
             cv2.circle(frame, center=(circles[0, 0], circles[0, 1]), radius=circles[0, 2], color=(0, 255, 0),
                        thickness=2)
