@@ -18,6 +18,8 @@ class FloatControlUI(QtWidgets.QMainWindow):
 
         # UI初始化
         self.connection()
+        self.status()
+        self.status_label = "Status Update"
         self.response()
         self.dpt()
         self.dpt = ""
@@ -122,6 +124,17 @@ class FloatControlUI(QtWidgets.QMainWindow):
         connectionLayout.addWidget(self.connection_status_label)
         connectionLayout.addStretch()
         self.pageLayout.addLayout(connectionLayout)
+    
+    def status(self):
+        self.status_label = QtWidgets.QLabel("Status Update", self)
+        self.status_label.setFixedHeight(60)
+        self.status_label.setStyleSheet('''
+            border: 2px dashed #6f6f6f;
+            font-size:22px;
+            font-weight:bold;
+        ''')
+        # 將元件加入到主排版
+        self.pageLayout.addWidget(self.status_label)
 
     def response(self):
         # 以下為UI部分
