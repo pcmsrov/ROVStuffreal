@@ -3,7 +3,13 @@ import cv2
 import numpy as np
 from oepnc import Video
 from pymavlink import mavutil
-
+'''
+███████ ██    ██ ███    ██  ██████ ████████ ██  ██████  ███    ██ ███████ 
+██      ██    ██ ████   ██ ██         ██    ██ ██    ██ ████   ██ ██      
+█████   ██    ██ ██ ██  ██ ██         ██    ██ ██    ██ ██ ██  ██ ███████ 
+██      ██    ██ ██  ██ ██ ██         ██    ██ ██    ██ ██  ██ ██      ██ 
+██       ██████  ██   ████  ██████    ██    ██  ██████  ██   ████ ███████ 
+'''
 def color(frame, start, end):
     captured_frame_bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
     captured_frame_bgr = cv2.medianBlur(captured_frame_bgr, 3)
