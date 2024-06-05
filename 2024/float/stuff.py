@@ -4,28 +4,7 @@ from PyQt6 import QtWidgets, QtGui, QtCore
 
 class FloatControlUI(QtWidgets.QMainWindow):
     def __init__(self, BT_addr, BT_port):
-        super(QtWidgets.QMainWindow, self).__init__()
-        # 視窗初始化
-        self.setWindowTitle('Float Control')
-        self.resize(400, 200)
-        self.setUpdatesEnabled(True)
-
-        # 主排板初始化
-        self.pageLayout = QtWidgets.QVBoxLayout()
-        widget = QtWidgets.QWidget()
-        widget.setLayout(self.pageLayout)
-        self.setCentralWidget(widget)
-
         # UI初始化
-        self.connection()
-        self.response()
-        self.dpt()
-        self.maxindpt()
-        self.maxindpt = ""
-        self.dpt = 0.0
-        self.response = ""
-        self.cmd_btn()
-        self.wifi()
 
         # 初始化用於UI更新的計時器
         self.timer = QtCore.QTimer()
@@ -71,25 +50,11 @@ class FloatControlUI(QtWidgets.QMainWindow):
             if ready[0]:
                 # 讀取回應（若連線失敗將跳到except）
                 response = self.BT_socket.recv(100).decode("UTF-8").strip()
-                temp = response.split("\n")
-                print(response)
-                if response >= '':
+                if response != '':
                     # 有時會收到兩個相同回應，因此只要第一個
-                    temp = response.split("\n")
-                    self.response = temp[0]
-                    try:
-                        self.dpt = temp[1]
-                        self.maxindpt = temp[2]
-                    except:
-                        self.dpt = 0.0
-                        self.maxindpt = "None"
-                    else:
-                        self.depth_label.setText(self.dpt)
-                        self.maxindpt_label.setText(self.maxindpt)
-                    finally:
-                        self.response_label.setText(self.response)
-
+                    self.response = response.split("\n")[0]
                     # 更新UI
+                    self.response_label.setText(self.response)
         except:
             # 改變UI
             self.response_label.setText("Failed to obtain time")
@@ -113,60 +78,6 @@ class FloatControlUI(QtWidgets.QMainWindow):
         except:
             # 失敗後改變UI
             self.response_label.setText("Failed to send Command")
-
-    def connection(self):
-        # 以下為UI部分
-        connection_label = QtWidgets.QLabel('Connection:', self)
-        connection_label.setStyleSheet('''
-            font-size:20px; 
-            font-weight:bold;
-        ''')
-        self.connection_status_label = QtWidgets.QLabel('Disconnect', self)
-        self.connection_status_label.setStyleSheet('''
-            color:red; 
-            font-size:20px; 
-            font-weight:bold;
-        ''')
-
-        # 將橫向排版加入到主排版
-        connectionLayout = QtWidgets.QHBoxLayout()
-        connectionLayout.addWidget(connection_label)
-        connectionLayout.addWidget(self.connection_status_label)
-        connectionLayout.addStretch()
-        self.pageLayout.addLayout(connectionLayout)
-
-    def response(self):
-        # 以下為UI部分
-        self.response_label = QtWidgets.QLabel("Failed to obtain time", self)
-        self.response_label.setFixedHeight(60)
-        self.response_label.setStyleSheet('''
-            border: 2px dashed #6f6f6f;
-            font-size:22px;
-            font-weight:bold;
-        ''')
-        # 將元件加入到主排版
-        self.pageLayout.addWidget(self.response_label)
-
-    def dpt(self):
-        self.depth_label = QtWidgets.QLabel("Failed to obtain depth", self)
-        self.depth_label.setFixedHeight(60)
-        self.depth_label.setStyleSheet('''
-            border: 2px dashed #6f6f6f;
-            font-size:22px;
-            font-weight:bold;
-        ''')
-        self.pageLayout.addWidget(self.depth_label)
-
-    def maxindpt(self):
-        self.maxindpt_label = QtWidgets.QLabel("Failed to obtain max and min depth", self)
-        self.maxindpt_label.setFixedHeight(60)
-        self.maxindpt_label.setStyleSheet('''
-            border: 2px dashed #6f6f6f;
-            font-size:22px;
-            font-weight:bold;
-        ''')
-        self.pageLayout.addWidget(self.maxindpt_label)
-
     def cmd_btn(self):
         # 以下為UI部分
         push_btn = QtWidgets.QPushButton('Push', self)
@@ -209,18 +120,11 @@ class FloatControlUI(QtWidgets.QMainWindow):
         connect_btn.clicked.connect(lambda: self.sendCommand(command))
 
         # 將橫向排版加入到主排版
-        wifiLayout = QtWidgets.QHBoxLayout()
-        wifiLayout.addWidget(ssid_label)
-        wifiLayout.addWidget(ssid_input)
-        wifiLayout.addWidget(password_label)
-        wifiLayout.addWidget(password_input)
-        wifiLayout.addWidget(connect_btn)
-        self.pageLayout.addLayout(wifiLayout)
 
 
 if __name__ == '__main__':
     # 藍牙裝置設定
-    BT_addr = "9C:9C:1F:EA:FE:5E"
+    BT_addr = "9C:9C:1F:EB:00:82"
     BT_port = 1  # 預設為1，不用改
 
     # UI設定
