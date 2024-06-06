@@ -51,15 +51,14 @@ while True:
         except:
             window["-WIFI-"].update("Unable to connect to Wifi", text_color="#F55D30")
 
-    while is_resetting:
-        try:
-            bt_socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-            bt_socket.connect((BT_addr, 1))
-            bt_socket.setblocking(0)
-            window["-STAT-"].update("Connected", text_color="#00ff00")
-            is_resetting = False
-        except:
-            bt_socket.close()
+    try:
+        bt_socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+        bt_socket.connect((BT_addr, 1))
+        bt_socket.setblocking(0)
+        window["-STAT-"].update("Connected", text_color="#00ff00")
+        is_resetting = False
+    except:
+        bt_socket.close()
 
     try:
         if is_resetting:
@@ -74,9 +73,10 @@ while True:
                 window["-DEPTH-"].update(repo[1])
                 psi = float(repo[1]) * 1000 * 9.81
                 window["-PRESSURE-"].update(psi)
-
     except:
-        window["-TIME-"].update("Unable to receive time", text_color="F55D30")
+        window["-TIME-"].update("Unable to receive time", text_color="#F55D30")
+        window["-DEPTH-"].update("Unable to receive depth", text_color="#F55D30")
+        window["-PRESSURE-"].update("Unable to calculate pressure", text_color="#F55D30")
         window["-STAT-"].update("Disconnected", text_color="#F55D30")
         is_resetting = True
         bt_socket.close()
