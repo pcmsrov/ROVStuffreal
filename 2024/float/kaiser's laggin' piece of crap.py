@@ -1,19 +1,20 @@
 import PySimpleGUI as sg
 import sys, socket, time, select, threading
 
-layout = [[sg.Text(text="Unable to obtain depth", key="-DEPTH-"),
-           sg.Text(text="Unable to obtain pressure", key="-PRESSURE-")],
+layout = [[sg.Frame("Depth", [[sg.Text(text="Unable to obtain depth", key="-DEPTH-")]]),
+           sg.Frame("Pressure", [[sg.Text(text="Unable to obtain pressure", key="-PRESSURE-")]])],
           [sg.Text(text="Unable to obtain time", key="-TIME-")],
           [sg.Button("Push"), sg.Button("Pull"), sg.Button("Dive")],
           [sg.StatusBar(text="Disconnected", key="-STAT-", text_color="#F55D30")],
           [sg.StatusBar(text="Currently no message", key="-MSG-", text_color="#d3d3d3")],
           [sg.StatusBar(text="Not connected to WiFi", key="-WIFI-", text_color="#F55D30")],
           [sg.StatusBar(text="The float is not conducting any actions", key="-ACT-", text_color="#d3d3d3")],
-          [sg.Input(default_text="SSID", key="-SSID-"), sg.Input(default_text="Password", key="-PWD-")],
+          [sg.Input(default_text="SSID", key="-SSID-")],
+          [sg.Input(default_text="Password", key="-PWD-")],
           [sg.Button("Connect")]
           ]
 
-window = sg.Window("Float Control", layout)
+window = sg.Window("Float Control", layout, element_justification='center')
 
 is_resetting = True
 BT_addr = "9C:9C:1F:EB:00:82"
