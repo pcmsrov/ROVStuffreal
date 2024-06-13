@@ -17,11 +17,23 @@ layout = [[sg.Frame("Depth", [[sg.Text(text="Unable to obtain depth", key="-DEPT
 window = sg.Window("Float Control", layout, element_justification='center')
 
 is_resetting = True
-BT_addr = "9C:9C:1F:EB:00:82"
+BT_addr = "EC:64:C9:5E:CF:3E"
 BT_port = 1
 bt_socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 while True:
     event, values = window.read()
+    try:
+        print("connected")
+        bt_socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+        bt_socket.connect((BT_addr, 1))
+        bt_socket.setblocking(0)
+        window["-STAT-"].update("Connected", text_color="#00ff00")
+        is_resetting = False
+    except:
+        print("crap")
+
+        bt_socket.close()
+
 
     if event == sg.WIN_CLOSED:
         break
@@ -53,15 +65,7 @@ while True:
             window["-WIFI-"].update("Unable to connect to Wifi", text_color="#F55D30")
 
     try:
-        bt_socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-        bt_socket.connect((BT_addr, 1))
-        bt_socket.setblocking(0)
-        window["-STAT-"].update("Connected", text_color="#00ff00")
-        is_resetting = False
-    except:
-        bt_socket.close()
-
-    try:
+        print("fuck")
         if is_resetting:
             pass
         ready = select.select([bt_socket], [], [], 3)
@@ -77,7 +81,7 @@ while True:
     except:
         window["-TIME-"].update("Unable to receive time", text_color="#F55D30")
         window["-DEPTH-"].update("Unable to receive depth", text_color="#F55D30")
-        window["-PRESSURE-"].update("Unable to calculate pressure", text_color="#F55D30")
+        window["-PRESSURE-"].update("Unable  to calculate pressure", text_color="#F55D30")
         window["-STAT-"].update("Disconnected", text_color="#F55D30")
         is_resetting = True
         bt_socket.close()
