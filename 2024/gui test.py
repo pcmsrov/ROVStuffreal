@@ -1,27 +1,31 @@
+import serial
+from serial import Serial
 import PySimpleGUI as sg
 
-layout1 = [[sg.Text('Window 1')],
-          [sg.Input(key='-INPUT-')],
-          [sg.Text(key='-TEXT-')],
-          [sg.Button('Show on Win 2')]]
 
-layout2 = [[sg.Text('Window 2')],
-          [sg.Input(key='-INPUT-')],
-          [sg.Text(key='-TEXT-')],
-          [sg.Button('Show on Win 1')]]
 
-window1 = sg.Window('Window 1', layout1, relative_location=(0,-180), finalize=True)
-window2 = sg.Window('Window 2', layout2, finalize=True)
+ser = serial.Serial('COM3', 115200, timeout=1)
+read = False
 
-while True:  # The Event Looop
-    window, event, values = sg.read_all_windows()
+sg.theme('DarkAmber')
+layout = [  [sg.InputText(), sg.Button('Empfindlichkeit einstellen')],
+            [sg.Button('start'), sg.Button('end')] ]
 
-    if event == sg.WIN_CLOSED:
+window = sg.Window('Window Title', layout)
+
+
+
+while True:
+    event, values = window.read()
+
+    if read == True:
+        reading = ser.readline()
+        print(reading[0:256])
+
+    if event == "start":
+        read = True
+
+    if event == sg.WIN_CLOSED or event == 'end':
         break
-    if window == window1:       # if button click on window 1, show text on window 2
-        window2['-TEXT-'].update(values['-INPUT-'])
-    else:                       # button was on window 2, so show text on window 1
-        window1['-TEXT-'].update(values['-INPUT-'])
 
-window1.close()
-window2.close()
+window.close()

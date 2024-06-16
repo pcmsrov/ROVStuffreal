@@ -33,7 +33,7 @@ class FloatControlUI(QtWidgets.QMainWindow):
         self.x = threading.Thread(target=self.bluetooth_init)
         self.x.start()
         
-        # 啟動每秒一次(1000ms)的計時器
+        # 啟動每秒一次(1000ms)的計時器1 
         self.timer.start(1000)
         
     def bluetooth_init(self):
@@ -180,7 +180,7 @@ class FloatControlUI(QtWidgets.QMainWindow):
 
 if __name__ == '__main__':
     # 藍牙裝置設定
-    BT_addr = "9C:9C:1F:EB:00:82"
+    BT_addr = "EC:64:C9:5E:CF:3E"
     BT_port = 1     # 預設為1，不用改
     
     # UI設定
