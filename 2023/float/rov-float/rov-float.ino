@@ -121,7 +121,7 @@ void loop() {
       char new_ssid[20];     // 初始化長度為20字元的字符new_ssid
       char new_password[20]; // 初始化長度為20字元的字符new_password
       tmp[1].toCharArray(new_ssid, 20);     // 將字串轉換為字符
-      tmp[0].toCharArray(new_password, 20); // 將字串轉換為字符
+      tmp[0].toCharArray(new_passworgmd, 20); // 將字串轉換為字符
       Serial.println(new_ssid);     // Debug用，可Delete
       Serial.println(new_password); // Debug用，可Delete
       WiFi.disconnect();   // 重置WiFi連線

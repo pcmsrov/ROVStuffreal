@@ -1,6 +1,6 @@
 import sys, socket, time, select, threading
-from PyQt6 import QtWidgets, QtGui, QtCore
 
+from PyQt6 import QtWidgets, QtGui, QtCore
 
 class FloatControlUI(QtWidgets.QMainWindow):
     def __init__(self, BT_addr, BT_port):
