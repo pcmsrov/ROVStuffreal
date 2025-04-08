@@ -1,13 +1,18 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "time.h"
+#include <list>
 #include <ESP_Google_Sheet_Client.h>
 
 // For SD/SD_MMC mounting helper
 #include <GS_SDHelper.h>
 
-#define WIFI_SSID "rovlab"
-#define WIFI_PASSWORD "pcmsrov22"
+#define WIFI_SSID "pcmsrov"
+#define WIFI_PASSWORD "12345678"
+
+using namespace std; 
+list<int> timeList; 
+list<float> depthlist;
 
 // Google Project ID
 #define PROJECT_ID "float-info"
@@ -23,20 +28,20 @@ const char spreadsheetId[] = "1l9fQ2_P42tdo-NMY-iV2iqaUs8bRqyZpD1TH2Bab2fw";
 
 // Timer variables
 unsigned long lastTime = 0;  
-unsigned long timerDelay = 30000;
+unsigned long timerDelay = 10000;
 
 // Token Callback function
 void tokenStatusCallback(TokenInfo info);
 
 // BME280 I2C
 // Variables to hold sensor readings
-const char temp[] = "hi";
+char temp[] = "hi";
 
 // NTP server to request epoch time
 const char* ntpServer = "pool.ntp.org";
 
 // Variable to save current epoch time
-unsigned long epochTime; 
+int epochTime; 
 
 // Function that gets current epoch time
 unsigned long getTime() {
@@ -50,7 +55,7 @@ unsigned long getTime() {
   return now;
 }
 
-void setup(){
+void setup() {
 
     Serial.begin(115200);
     Serial.println();
@@ -81,18 +86,43 @@ void setup(){
     GSheet.setTokenCallback(tokenStatusCallback);
 
     // Set the seconds to refresh the auth token before expire (60 to 3540, default is 300 seconds)
-    GSheet.setPrerefreshSeconds(10 * 60);
+    GSheet.setPrerefreshSeconds(3540);
 
     // Begin the access token generation for Google API authentication
     GSheet.begin(CLIENT_EMAIL, PROJECT_ID, PRIVATE_KEY);
+    epochTime = getTime();
 }
 
 void loop(){
     // Call ready() repeatedly in loop for authentication checking and processing
     bool ready = GSheet.ready();
-
+    Serial.println(ready);
     if (ready && millis() - lastTime > timerDelay){
-        lastTime = millis();
+      lastTime = millis();
+      if (WiFi.status() == WL_CONNECTED) {
+        for (int i = 0; i < timeList.size(); i++) {
+          FirebaseJson response;
+
+          Serial.println("\nAppend spreadsheet values...");
+          Serial.println("----------------------------");
+
+          FirebaseJson valueRange;
+
+          valueRange.add("majorDimension", "COLUMNS");
+          valueRange.set("values/[0]/[0]", *next(timeList.begin(), i));
+          valueRange.set("values/[1]/[0]", "1.0");
+
+          bool success = GSheet.values.append(&response, spreadsheetId, "Sheet1!A1", &valueRange);
+          if (success){
+              response.toString(Serial, true);
+              valueRange.clear();
+          }
+          else{
+              Serial.println(GSheet.errorReason());
+          }
+          Serial.println();
+          Serial.println(ESP.getFreeHeap());
+        }
 
         FirebaseJson response;
 
@@ -101,18 +131,11 @@ void loop(){
 
         FirebaseJson valueRange;
 
-        // New BME280 sensor readings
-        //temp = 1.8*bme.readTemperature() + 32;
-        // Get timestamp
-        epochTime = getTime();
-
         valueRange.add("majorDimension", "COLUMNS");
-        valueRange.set("values/[0]/[0]", epochTime);
-        valueRange.set("values/[1]/[0]", temp);
+        valueRange.set("values/[0]/[0]", epochTime + (lastTime / 1000));
+        valueRange.set("values/[1]/[0]", "1.0");
 
-        // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/append
-        // Append values to the spreadsheet
-        bool success = GSheet.values.append(&response /* returned response */, spreadsheetId /* spreadsheet Id to append */, "Sheet1!A1" /* range to append */, &valueRange /* data range to append */);
+        bool success = GSheet.values.append(&response, spreadsheetId, "Sheet1!A1", &valueRange);
         if (success){
             response.toString(Serial, true);
             valueRange.clear();
@@ -122,6 +145,15 @@ void loop(){
         }
         Serial.println();
         Serial.println(ESP.getFreeHeap());
+
+        timeList.clear();
+      }
+      else {
+        timeList.push_back(epochTime + (lastTime / 1000));
+      }
+    }
+    else if (!ready && millis() - lastTime > timerDelay) {
+      timeList.push_back(epochTime + (lastTime / 1000));
     }
 }
 
