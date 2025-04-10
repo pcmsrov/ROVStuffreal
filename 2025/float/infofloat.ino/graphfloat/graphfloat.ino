@@ -10,7 +10,6 @@
 #include <Wire.h>
 #include <iostream>
 #include <chrono>
-#include <ctime>
 #include <thread>
 #include "MS5837.h"
 
@@ -25,9 +24,9 @@ const int pin2 = 17;
 list<int> timeList;
 list<float> depthList;
 
-#define PROJECT_ID "float-info";
+#define PROJECT_ID "float-info"
 
-#define CLIENT_EMAIL "floattransmitter@float-info.iam.gserviceaccount.com";
+#define CLIENT_EMAIL "floattransmitter@float-info.iam.gserviceaccount.com"
 
 const char PRIVATE_KEY[] PROGMEM = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC642yaOO24f20Z\nkyQby2UOoNV3AsbVEjuPVDdLw/VRS3GpWtTcp4+SWWuPALIdNUaW8UCQESDiLnyL\n6E8M0Dm/nQyDyYgix8mJ8sG3CeatkzNmVbEdCeLHqsX5hSQjtOyTJN3snl/+jmbx\nmiT9r6VwZfwED4k536XmlPTOd7mU/yjK9bAE5ntmbpKBHQj/WrHUpykZgTYZe8M0\n1SY+f6cRLyxB9KJyB4UZCRsdmGvbABUbFmf+PK1tVN9QhweZK488Nt6nQHXVlp12\nlIiGKBp5QCW/F91LCVXxIx5uDCA/Jib0fAVxvAY1s8HvBgquVF0AtBfNXgZiN/qC\n6do+s9BfAgMBAAECggEACCYJYrIPv2ci8SYGwYV9SwV9OTqwQ7MPUMEJxi5toFVL\nR+iTdmmB644lj+8mVPqxMLylJYLxrZr8SDdhVvwvQGkPFiHv4yBV68NfaeUvHytX\nZuNenRcEwdLy3d3NxRbK5+GIIZyIL/eyil8/tKX3by6rLdwljhXvzF17TRNQTqw8\nO0EZVsM5H6OdOOiwBwF/yg/OjY5ISfy9n8Uq4ri/7003LcXgoiyFlEjg1qYdkW9e\nADf5mbxd77xFjqPs7nDc5NrLf9ZZ8QqbNCTkNAfmpQTIRFyOxoSZGMxCGI0+yZkG\nQUPku5h4XmRuoN3TFUveV9rBI8PXLvU67lWkq+woxQKBgQD2rSX26TM8jqq2vSZs\ng8Y3NxB2yfC1JEHqZOyvdHD2mbNrgxpqiMOSOdu2yIJIvekshzNIHLI7po4pB8rq\nWKcYw3YLBh8SsQmlSGZONl4VSrs4rUjk+tKMIJgnWeq5mKE+tG/FJgH0hTtrWffk\nnWqMGXtRTVbIbjrL5IvH7jhUywKBgQDB88PBLwBB2zzcTQrRudeCfnKr6uGj6w4S\npAc5S+d67s1evISf60/i2kxsZJbm0NrvPo5YTZZ6jAg4VIRtq4FAm/1P7Ao/levG\n+UUWK2gg9iEwKJ/g9/r6Pyc3sG6vi4ZmDTzaby+RaRXsTZzHUKj8bGMEXAPujPg4\nSdVytL9UPQKBgQCjuhtHvlMmr575uaRGRFSNE3xXDAQ7hvxFQoWik0vjMfNXueYP\nrgT5CnQd5woqk/qvdnGAPKPEWfFjpGt3ji4ijqHMAV0gf+diECLvaMCbq0WHAeUv\nLpgPMBctj03vsDHeN88z8N09Wi0tPML/t8gfg05JkWa3lApsiJ6KrkAvbwKBgE0w\nGD3v2Khc+jGqr52b2nrim/xzc+1qhKVChmV1IeC43R7Q4+9JFPfxbOzOc4fUou0H\n9lqKNlL7G+JfMHz8/mmaKwv9om5/2d/MIIScLcrAaaDi6g38YvPo4lC1dLeETa6b\nohZEnae/LKxojvZ70WT0NcvsWtw7WiX8rGgEKwj5AoGBAKH1RwEOEOCH+NryGzbK\n7pk5tJP30usAt4BFNGbhPPYIruNZl0O1mYtNH5oT7srPC54XOpDkXlAq6gOHPXiJ\nsnGJSdNw2InLZCOp4OWSgM1PVdkRwgJ0kA4tygyx/a4b4/m5CbfYIh7AptUIUZsd\nNpxeGT1dwYvH7wyJFhYNabyA\n-----END PRIVATE KEY-----\n";
 
@@ -35,7 +34,7 @@ const char spreadsheetId[] = "1l9fQ2_P42tdo-NMY-iV2iqaUs8bRqyZpD1TH2Bab2fw";
 
 unsigned long timerDelay = 3000;
 
-void tokenStatusCallBack(TokenInfo info);
+void tokenStatusCallback(TokenInfo info);
 
 float a;
 float depth;
@@ -55,32 +54,6 @@ BluetoothSerial BT;     // 建立藍牙串口物件
 struct tm timeinfoTmp;  // 建立時間結構
 Timer timer;            // 建立計時物件
 
-void setup() {
-  // 串口初始化(Debug用)
-  Serial.begin(115200);
-  Wire.begin();
-
-  // 針腳初始化
-  pinMode(pin1, OUTPUT);
-  pinMode(pin2, OUTPUT);
-
-  // 藍牙初始化
-  BT.begin("PCMSROV.m1");
-  Serial.println("Setup complete.");
-
-  // WiFi初始化
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
-
-  // 使計時器每秒執行一次getTime()
-  timer.every(1000, getTime);
-  GSheet.setTokenCallback(tokenStatusCallBack);
-  GSheet.setPrerefreshSeconds(3540);
-  GSheet.begin(CLIENT_EMAIL, PROJECT_ID, PRIVATE_KEY);
-
-  sensor.setFluidDensity(997);
-}
 
 void getTime() {
   // 如果WiFi已連線則獲取時間
@@ -102,7 +75,7 @@ void getTime() {
   }
 }
 
-unsigned long getEpochTime() {
+int getEpochTime() {
   time_t now;
   struct tm timeinfo;
   if (!getLocalTime(&timeinfo)) {
@@ -111,6 +84,33 @@ unsigned long getEpochTime() {
   }
   time(&now);
   return now;
+}
+
+void setup() {
+  // 串口初始化(Debug用)
+  Serial.begin(115200);
+  Wire.begin();
+
+  // 針腳初始化
+  pinMode(pin1, OUTPUT);
+  pinMode(pin2, OUTPUT);
+
+  // 藍牙初始化
+  BT.begin("PCMSROV.m1");
+  Serial.println("Setup complete.");
+
+  // WiFi初始化
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+
+  // 使計時器每秒執行一次getTime()
+  timer.every(1000, getTime);
+  GSheet.setTokenCallback(tokenStatusCallback);
+  GSheet.setPrerefreshSeconds(3540);
+  GSheet.begin(CLIENT_EMAIL, PROJECT_ID, PRIVATE_KEY);
+
+  sensor.setFluidDensity(997);
 }
 
 void loop() {
@@ -140,7 +140,7 @@ void loop() {
       startTime = time;
       digitalWrite(pin1, LOW);
       digitalWrite(pin2, HIGH);
-      while (startTime + 120 < time) {
+      while (startTime + 120 > time) {
         time += millis() / 1000;
         if (time - lastTime > timerDelay) {
           sensor.read();
@@ -182,7 +182,7 @@ void loop() {
             depthList.push_back(depth);
           }
         }
-        if (real == 60) {
+        if (startTime + 60 == time) {
           digitalWrite(pin1, LOW);
           digitalWrite(pin2, LOW);
           digitalWrite(pin1, HIGH);
@@ -231,4 +231,13 @@ void loop() {
       BT.println("Invalid Action!");
     }
   }
+}
+void tokenStatusCallback(TokenInfo info){
+    if (info.status == token_status_error){
+        GSheet.printf("Token info: type = %s, status = %s\n", GSheet.getTokenType(info).c_str(), GSheet.getTokenStatus(info).c_str());
+        GSheet.printf("Token error: %s\n", GSheet.getTokenError(info).c_str());
+    }
+    else{
+        GSheet.printf("Token info: type = %s, status = %s\n", GSheet.getTokenType(info).c_str(), GSheet.getTokenStatus(info).c_str());
+    }
 }
