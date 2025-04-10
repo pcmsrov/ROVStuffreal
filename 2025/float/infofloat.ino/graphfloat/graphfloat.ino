@@ -7,6 +7,8 @@
 #include <WiFi.h>
 #include "time.h"
 #include "Timer.h"
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 #include <Wire.h>
 #include <iostream>
 #include <chrono>
@@ -32,7 +34,7 @@ const char PRIVATE_KEY[] PROGMEM = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgk
 
 const char spreadsheetId[] = "1l9fQ2_P42tdo-NMY-iV2iqaUs8bRqyZpD1TH2Bab2fw";
 
-unsigned long timerDelay = 3000;
+unsigned long timerDelay = 3;
 
 void tokenStatusCallback(TokenInfo info);
 
@@ -49,6 +51,8 @@ int lastTime;
 int startTime;
 unsigned long epochTime;
 
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, ntpServer, gmtOffset_sec, daylightOffset_sec);
 
 BluetoothSerial BT;     // 建立藍牙串口物件
 struct tm timeinfoTmp;  // 建立時間結構
@@ -63,8 +67,8 @@ void getTime() {
     struct tm timeinfo;
     getLocalTime(&timeinfo);
 
-    a = sensor.pressure() * 20.0;
-    depth = sensor.depth() + 10;
+    // a = sensor.pressure() * 20.0;
+    // depth = sensor.depth() + 10;
 
     // 將結果通過藍牙串口傳送到電腦(記得加返team number)
     BT.println(&timeinfo, "%H:%M:%S UTC R4"); 
@@ -73,17 +77,6 @@ void getTime() {
     // 否則傳送空字串表示無改變
     BT.println("");
   }
-}
-
-int getEpochTime() {
-  time_t now;
-  struct tm timeinfo;
-  if (!getLocalTime(&timeinfo)) {
-    //Serial.println("Failed to obtain time");
-    return(0);
-  }
-  time(&now);
-  return now;
 }
 
 void setup() {
@@ -111,9 +104,12 @@ void setup() {
   GSheet.begin(CLIENT_EMAIL, PROJECT_ID, PRIVATE_KEY);
 
   sensor.setFluidDensity(997);
+  timeClient.begin();
+  timeClient.update();
 }
 
 void loop() {
+  timeClient.update();
   timer.update();      // 每次Loop更新計時器(會自動平衡刷新率，使getTime()保持在一秒一次)
   String inputFromPC;  // 每次Loop重置接收指令用的空字串
   if (BT.available()) {
@@ -136,35 +132,36 @@ void loop() {
     } else if (inputFromPC == "dive") {
       BT.println("Float is diving!");
       lastTime = 0;
-      int time = getEpochTime();
+      int time = timeClient.getEpochTime();
       startTime = time;
       digitalWrite(pin1, LOW);
       digitalWrite(pin2, HIGH);
-      while (startTime + 120 > time) {
-        time += millis() / 1000;
+      while (time < startTime + 120) {
+        time = timeClient.getEpochTime();
         if (time - lastTime > timerDelay) {
+          lastTime = time;
           sensor.read();
           depth = sensor.depth() + 10;
-          if (WiFi.status() == WL_CONNECTED) {
-            FirebaseJson response;
-            FirebaseJson valueRange;
-            for (int i = 0; i < timeList.size(); i++) {
-              valueRange.add("majorDimension", "COLUMNS");
-              valueRange.set("values/[0]/[0]", *next(timeList.begin(), i));
-              valueRange.set("values/[1]/[0]", *next(timeList.begin(), i));
-
-              bool success = GSheet.values.append(&response, spreadsheetId, "Sheet1!A1", &valueRange);
-              if (success) {
-                response.toString(Serial, true);
-                valueRange.clear();
-              }
-              else {
-                Serial.println(GSheet.errorReason());
-              }
-            }
+          timeList.push_back(time);
+          depthList.push_back(depth);
+        }
+        if (time == startTime + 60) {
+          digitalWrite(pin1, LOW);
+          digitalWrite(pin2, LOW);
+          digitalWrite(pin1, HIGH);
+          digitalWrite(pin2, LOW);
+        }
+      }
+      digitalWrite(pin1, LOW);
+      do {
+        bool ready = GSheet.ready();
+        if (ready) {
+          FirebaseJson response;
+          FirebaseJson valueRange;
+          for (int i = 0; i < timeList.size(); i++) {
             valueRange.add("majorDimension", "COLUMNS");
-            valueRange.set("values/[0]/[0]", time);
-            valueRange.set("values/[1]/[0]", depth);
+            valueRange.set("values/[0]/[0]", *next(timeList.begin(), i));
+            valueRange.set("values/[1]/[0]", *next(depthList.begin(), i));
 
             bool success = GSheet.values.append(&response, spreadsheetId, "Sheet1!A1", &valueRange);
             if (success) {
@@ -174,33 +171,15 @@ void loop() {
             else {
               Serial.println(GSheet.errorReason());
             }
-            timeList.clear();
-            depthList.clear();
-          }
-          else {
-            timeList.push_back(time);
-            depthList.push_back(depth);
           }
         }
-        if (startTime + 60 == time) {
-          digitalWrite(pin1, LOW);
-          digitalWrite(pin2, LOW);
-          digitalWrite(pin1, HIGH);
-          digitalWrite(pin2, LOW);
-        }
-      }
-      digitalWrite(pin1, LOW);
-      // digitalWrite(pin1, LOW);
-      // digitalWrite(pin2, HIGH);
-      // delay(1000 * 50);
-      // digitalWrite(pin1, HIGH);
-      // digitalWrite(pin2, LOW);
-      // delay(1000 * 10.5);
-      // digitalWrite(pin1, LOW);
+      } while (WiFi.status() != WL_CONNECTED);
+      BT.println("Uploaded depth data!");
+      delay(1000 * 10);
+      timeList.clear();
+      depthList.clear();  
     } else if (inputFromPC.indexOf("wifi") > -1) {
-      // 以下為遠程控制連接WiFi的程式
       String tmp[3];
-      // 將"wifi^HUAWEI P40 Pro^12345678以"^"分割成字串列表
       for (int i = 0; i < 3; i++) {
         int index = inputFromPC.lastIndexOf("^");
         int length = inputFromPC.length();
@@ -216,7 +195,6 @@ void loop() {
       Serial.println(new_password);          // Debug用，可Delete
       WiFi.disconnect();                     // 重置WiFi連線
       WiFi.begin(new_ssid, new_password);    // 使用新SSID及密碼連接WiFi
-      // 等待WiFi成功連接（20秒）
       for (int i = 0; i < 20; i++) {
         Serial.print(".");
         if (WiFi.status() == WL_CONNECTED) {
