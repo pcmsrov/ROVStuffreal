@@ -54,32 +54,6 @@ unsigned long epochTime;
 BluetoothSerial BT;     // 建立藍牙串口物件
 struct tm timeinfoTmp;  // 建立時間結構
 Timer timer;            // 建立計時物件
-// class Ticker [
-// public: 
-//   typedef std::chrono::duration<int64_t, std::nano> tick_interval_t;
-//   typedef std::function<void()> on_tick_t;
-
-//   Ticker(std::function<void> onTick, std::chrono::duration<int64_t, std::nano> tickInterval)
-//   : _onTick(onTick)
-//   , _tickInterval(tickInterval)
-//   , _running(false){}
-//   ~Ticker(){}
-
-//   void start() {
-//     if (_running) return;
-//     _running = true;
-//     std::thread run(&Ticker::timer_loop, this);
-//     run.detach();
-//   }
-
-//   void stop(){_running=false; }
-
-//   void setDuration(std::chrono::duration<int64_t, std::nano> tickInterval) {
-//     _tickIntervalMutex.lock();
-//     _tickInterval = tickInterval;
-//     _tickIntervalMutex.unlock();
-//   }
-// ]
 
 void setup() {
   // 串口初始化(Debug用)
@@ -163,26 +137,23 @@ void loop() {
       BT.println("Float is diving!");
       lastTime = 0;
       int time = getEpochTime();
-      int real = 0;
       startTime = time;
       digitalWrite(pin1, LOW);
       digitalWrite(pin2, HIGH);
       while (startTime + 120 < time) {
-        sleep(1000);
-        time += 1;
-        real += 1;
-        if (time - lastTime > 3) {
+        time += millis() / 1000;
+        if (time - lastTime > timerDelay) {
           sensor.read();
           depth = sensor.depth() + 10;
-          if (WiFi.status() == WL_CONNECTED ) {
+          if (WiFi.status() == WL_CONNECTED) {
             FirebaseJson response;
             FirebaseJson valueRange;
             for (int i = 0; i < timeList.size(); i++) {
               valueRange.add("majorDimension", "COLUMNS");
-              valueRange.set("values/[0]/[0]", timeList[i]);
-              valueRange.set("values/[1]/[0]", depthList[i]);
+              valueRange.set("values/[0]/[0]", *next(timeList.begin(), i));
+              valueRange.set("values/[1]/[0]", *next(timeList.begin(), i));
 
-              bool success = GSheet.values.append(&response /* returned response */, spreadsheetId /* spreadsheet Id to append */, "Sheet1!A1" /* range to append */, &valueRange /* data range to append */);
+              bool success = GSheet.values.append(&response, spreadsheetId, "Sheet1!A1", &valueRange);
               if (success) {
                 response.toString(Serial, true);
                 valueRange.clear();
@@ -190,6 +161,18 @@ void loop() {
               else {
                 Serial.println(GSheet.errorReason());
               }
+            }
+            valueRange.add("majorDimension", "COLUMNS");
+            valueRange.set("values/[0]/[0]", time);
+            valueRange.set("values/[1]/[0]", depth);
+
+            bool success = GSheet.values.append(&response, spreadsheetId, "Sheet1!A1", &valueRange);
+            if (success) {
+              response.toString(Serial, true);
+              valueRange.clear();
+            }
+            else {
+              Serial.println(GSheet.errorReason());
             }
             timeList.clear();
             depthList.clear();
